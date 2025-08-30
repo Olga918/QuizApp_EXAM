@@ -223,11 +223,47 @@
                     return;
                 }
 
-                quizService.StartQuiz(user, selectedCategory);
+                // Выбор режима времени
+                int timeLimit = SelectTimeMode();
+                
+                quizService.StartQuiz(user, selectedCategory, timeLimit);
             }
             else
             {
                 Console.WriteLine("❌ Неверный ввод!");
+            }
+        }
+
+        private static int SelectTimeMode()
+        {
+            Console.WriteLine("\n⏱️ Выберите режим времени:");
+            Console.WriteLine(new string('=', 40));
+            Console.WriteLine("1. 🚀 Быстрый режим (30 секунд на ответ)");
+            Console.WriteLine("2. ⚡ Стандартный режим (1 минута на ответ)");
+            Console.WriteLine("3. 🐌 Расслабленный режим (2 минуты на ответ)");
+            Console.WriteLine("4. ♾️ Без ограничения времени");
+            Console.WriteLine(new string('=', 40));
+            
+            Console.Write("Выберите режим (1-4): ");
+            string timeChoice = Console.ReadLine();
+            
+            switch (timeChoice)
+            {
+                case "1":
+                    Console.WriteLine("🚀 Выбран быстрый режим - 30 секунд на ответ!");
+                    return 30;
+                case "2":
+                    Console.WriteLine("⚡ Выбран стандартный режим - 1 минута на ответ!");
+                    return 60;
+                case "3":
+                    Console.WriteLine("🐌 Выбран расслабленный режим - 2 минуты на ответ!");
+                    return 120;
+                case "4":
+                    Console.WriteLine("♾️ Выбран режим без ограничения времени!");
+                    return 0;
+                default:
+                    Console.WriteLine("⚡ По умолчанию выбран стандартный режим - 1 минута на ответ!");
+                    return 60;
             }
         }
 

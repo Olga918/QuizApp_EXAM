@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace QuizApp_EXAM
 {
@@ -55,7 +56,7 @@ namespace QuizApp_EXAM
             return quizzes;
         }
 
-        public void StartQuiz(User user, string category)
+        public void StartQuiz(User user, string category, int timeLimit = 0)
         {
             Quiz quiz;
             string quizCategory;
@@ -79,6 +80,16 @@ namespace QuizApp_EXAM
 
             Console.WriteLine($"\n🎯 Начинаем викторину: {quizCategory}");
             Console.WriteLine($"📝 Всего вопросов: {Math.Min(20, quiz.Questions.Count)}");
+            
+            if (timeLimit > 0)
+            {
+                Console.WriteLine($"⏱️ Ограничение времени: {timeLimit} секунд на ответ");
+            }
+            else
+            {
+                Console.WriteLine("♾️ Без ограничения времени");
+            }
+            
             Console.WriteLine("Нажмите Enter для начала...");
             Console.ReadLine();
 
@@ -106,7 +117,16 @@ namespace QuizApp_EXAM
                 }
 
                 Console.Write("Ваш ответ: ");
-                var input = Console.ReadLine();
+                string input = "";
+                
+                if (timeLimit > 0)
+                {
+                    input = ReadAnswerWithTimer(timeLimit);
+                }
+                else
+                {
+                    input = Console.ReadLine();
+                }
                 
                 if (string.IsNullOrWhiteSpace(input))
                 {
@@ -312,6 +332,49 @@ namespace QuizApp_EXAM
         {
             var correctOptions = question.CorrectAnswers.Select(i => question.Options[i]).ToList();
             return string.Join(", ", correctOptions);
+        }
+
+        private string ReadAnswerWithTimer(int timeLimit)
+        {
+            var input = new System.Text.StringBuilder();
+            var startTime = DateTime.Now;
+            var endTime = startTime.AddSeconds(timeLimit);
+            
+            Console.CursorVisible = true;
+            
+            while (DateTime.Now < endTime)
+            {
+                var remainingTime = (int)(endTime - DateTime.Now).TotalSeconds;
+                
+                // Очищаем строку и показываем оставшееся время
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write($"Ваш ответ: {input} | ⏱️ Осталось: {remainingTime} сек");
+                
+                if (Console.KeyAvailable)
+                {
+                    var key = Console.ReadKey(true);
+                    
+                    if (key.Key == ConsoleKey.Enter)
+                    {
+                        Console.WriteLine();
+                        return input.ToString();
+                    }
+                    else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                    {
+                        input.Length--;
+                    }
+                    else if (!char.IsControl(key.KeyChar))
+                    {
+                        input.Append(key.KeyChar);
+                    }
+                }
+                
+                Thread.Sleep(100); // Небольшая задержка
+            }
+            
+            Console.WriteLine();
+            Console.WriteLine("⏰ Время истекло! Ответ не принят.");
+            return "";
         }
     }
 }
